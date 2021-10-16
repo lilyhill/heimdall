@@ -21,7 +21,6 @@ from .views import *
 urlpatterns = [
     path('signup', signup),
     path('login', my_login),
-    path('token', token),
     path('validate', validate_token),
     re_path(r'^(?P<url>.*)', catchall)
 ]

@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  web:
+    env_file:
+      - .env
+    build:
+      context: ./heimdall
+      dockerfile: Dockerfile.prod
+    expose:
+      - 80
+    ports:
+      - 80:8000
+    network_mode: "host"

@@ -9,7 +9,11 @@ from .models import MyUser
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
-
+from django.utils.module_loading import import_module
+from django.conf import settings
+from django.contrib.auth import get_user
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, load_backend
 
 # Create your views here.
 @csrf_exempt
@@ -62,7 +66,6 @@ def my_login(request):
             password = data['password']
         )
 
-        user_instance.save()
         k = login(request,user_instance, backend='django.contrib.auth.backends.ModelBackend')
         print(k)
 
@@ -95,26 +98,21 @@ def catchall(request, url):
 
     response = redirect("http://localhost:3003" + url)
     ic(response)
-    u = 'http://localhost:3003/oauth/evernote/signin/'
+    u = 'http://localhost:3003/' + url
     ic(u)
     return HttpResponseRedirect(u)
 
 
 
-from django.utils.module_loading import import_module
-from django.conf import settings
-from django.contrib.auth import get_user
-from django.contrib.auth.models import AnonymousUser
-from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, load_backend
 
 
+@csrf_exempt
 def validate_token(request):
 
     sess_key = json.loads(request.body)['session']
 
     engine = import_module(settings.SESSION_ENGINE)
     session = engine.SessionStore(sess_key)
-
 
     try:
         user_id = session[SESSION_KEY]
