@@ -19,8 +19,10 @@ from django.urls import path, include, re_path
 from .views import *
 
 urlpatterns = [
-    path('signup', signup),
-    path('login', my_login),
+    path('signup', heimdall_signup),
+    path('login', heimdall_login),
+    path('logout', logout_user),
     path('validate', validate_token),
     re_path(r'^(?P<url>.*)', catchall)
 ]
+

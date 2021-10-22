@@ -1,23 +1,20 @@
 from django.http import JsonResponse, HttpResponseRedirect
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from .models import MyUser
 import json
 from .validator import UserForm, LoginForm
 from icecream import ic
 from .models import MyUser
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.shortcuts import redirect
 from django.utils.module_loading import import_module
 from django.conf import settings
-from django.contrib.auth import get_user
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, load_backend
+from .utils import get_user_data
 
-# Create your views here.
+
 @csrf_exempt
-def signup(request):
+def heimdall_signup(request):
 
     body = json.loads(request.body)
     form = UserForm(body)
@@ -50,9 +47,8 @@ def signup(request):
         return JsonResponse(form.errors)
 
 
-
 @csrf_exempt
-def my_login(request):
+def heimdall_login(request):
 
     body = json.loads(request.body)
     print(body)
@@ -65,45 +61,31 @@ def my_login(request):
             username = data['username'],
             password = data['password']
         )
+        if user_instance:
+            login(request,user_instance, backend='django.contrib.auth.backends.ModelBackend')
 
-        k = login(request,user_instance, backend='django.contrib.auth.backends.ModelBackend')
-        print(k)
-
-        success = {
-            'status': 'OK',
-            'message': 'user created successfully',
-            'user':'user'
-        }
-        return JsonResponse(success)
-
+            res = {
+                'success': True,
+                'user': get_user_data(user_instance)
+            }
+            return JsonResponse(res)
+        else:
+            res = {
+                "success": False,
+                "error": "user not found"
+            }
+            return JsonResponse(res, status=401)
     else:
         return JsonResponse(form.errors)
 
 
-@csrf_exempt
-def token(request):
-
-    if not request.user.is_authenticated:
-        return JsonResponse({'isAuthenticated': False})
-
-    return JsonResponse({'isAuthenticated': True})
 
 @csrf_exempt
-def catchall(request, url):
-    ic("catchall")
+def logout_user(request):
 
-    if not request.user.is_authenticated:
-        response = redirect("http://localhost:3003" + url)
-        return JsonResponse({'isAuthenticated': False})
+    logout(request)
 
-    response = redirect("http://localhost:3003" + url)
-    ic(response)
-    u = 'http://localhost:3003/' + url
-    ic(u)
-    return HttpResponseRedirect(u)
-
-
-
+    return JsonResponse({'logged_out': True})
 
 
 @csrf_exempt
@@ -120,12 +102,10 @@ def validate_token(request):
         backend = load_backend(backend_path)
         user = backend.get_user(user_id) or AnonymousUser()
         ic(user)
+        u = get_user_data(user)
         res = {
-            "status" : "ok",
-            "user" : {
-                "username" : user.username,
-                "email" : user.email
-            }
+            "status": "ok",
+            "user": u
         }
 
     except KeyError:
@@ -138,3 +118,18 @@ def validate_token(request):
         }
 
     return JsonResponse(res)
+
+
+@csrf_exempt
+def catchall(request, url):
+    ic("catchall")
+
+    if not request.user.is_authenticated:
+
+        return JsonResponse({'isAuthenticated': False})
+
+    response = redirect("http://localhost:3003" + url)
+    ic(response)
+    u = 'http://localhost:3003/' + url
+    ic(u)
+    return HttpResponseRedirect(u)
