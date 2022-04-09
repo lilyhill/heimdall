@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	pb "../ledger/proto"
+	pb "github.com/lilyhill/heimdall/ledger"
 )
 
 const (
