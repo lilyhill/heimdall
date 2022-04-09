@@ -4,7 +4,7 @@
 // - protoc             v3.17.3
 // source: ledger.proto
 
-package proto
+package ledger
 
 import (
 	context "context"
