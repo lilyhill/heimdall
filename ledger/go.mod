@@ -1,4 +1,4 @@
-module github.com/lilyhill/Heimdal/ledger
+module github.com/lilyhill/heimdall/ledger
 
 go 1.16
 

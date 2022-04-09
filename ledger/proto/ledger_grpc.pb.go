@@ -4,7 +4,7 @@
 // - protoc             v3.17.3
 // source: proto/ledger.proto
 
-package ledger
+package heimdall
 
 import (
 	context "context"
