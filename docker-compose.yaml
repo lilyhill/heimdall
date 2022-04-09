@@ -5,10 +5,14 @@ services:
     env_file:
       - .env
     build:
-      context: ./heimdall
-      dockerfile: Dockerfile.prod
+      context: ledger1
+      dockerfile: Dockerfile
     expose:
       - 80
     ports:
       - 80:8000
     network_mode: "host"
+
+  store:
+    image: redis:7.0-rc3-bullseye
+
